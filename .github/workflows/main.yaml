@@ -47,12 +47,26 @@ jobs:
           VERSION=v$(date +"%Y%m%d%H%M%S")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # Build and push Docker image
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            hagersaad329/repo-test:${{ env.VERSION }}
-            hagersaad329/repo-test:latest
+      # Build Docker image
+      - name : Build Docker images
+        run: |
+          docker build . -t hagersaad329/repo-test:${{ env.VERSION }}
+      #  Push Docker image
+      - name: push docker images
+        run : |
+          docker push hagersaad329/repo-test:${{ env.VERSION }}
+      # update k8s manifest files
+      - name : update the manifest files
+        run: |
+          cat deploy/deployment.yaml
+          sed -i "s|image: hagersaad329/repo-test:${{ env.VERSION }}|g" deploy/deployment.yaml
+          cat deploy/deployment.yaml
+      # Update Github
+      - name: Commit the changes
+        run: |
+          git config --global user.email "<>"
+          git config --global user.name "GitHub Actions Bot"
+          git add deploy/deployment.yaml
+          git commit -m "Update deployment.yaml with new image version - ${{ env.VERSION }}"
+          git remote set-url origin https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com:Hager-Saad-2024/Flask-App-GitHub-Actions-ArgoCD-Public.git
+          git push origin master
