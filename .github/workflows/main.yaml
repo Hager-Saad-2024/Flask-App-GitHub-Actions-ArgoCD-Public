@@ -59,7 +59,7 @@ jobs:
       - name : update the manifest files
         run: |
           cat deploy/deployment.yaml
-          sed -i "s|image: hagersaad329/repo-test:${{ env.VERSION }}|g" deploy/deployment.yaml
+          sed -i "s|hagersaad329/repo-test:.*|hagersaad329/repo-test:${{ env.VERSION }}|g" deploy/deployment.yaml
           cat deploy/deployment.yaml
       # Update Github
       - name: Commit the changes
